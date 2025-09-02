@@ -211,7 +211,7 @@ describe("Coverage Tests - Real Functionality", () => {
       const classWithComplexParams = await crawler.listClasses(TEST_BASE_URL);
       if (classWithComplexParams.length > 0) {
         // This will exercise parseParameters, extractMethodName, and other private methods
-        await crawler.getClassDetails(TEST_BASE_URL, classWithComplexParams[0].name);
+        await crawler.getClassDetails(TEST_BASE_URL, classWithComplexParams[0]?.name || "TestClass");
       }
       
       expect(true).toBe(true); // Just ensure test completes without errors
@@ -332,11 +332,11 @@ describe("MCP Server Coverage Tests", () => {
         
         // Expose private members for testing
         getServer() {
-          return this.server;
+          return (this as any).server;
         }
         
         getCrawler() {
-          return this.crawler;
+          return (this as any).crawler;
         }
         
         // Expose setupHandlers to trigger its execution
@@ -372,7 +372,7 @@ describe("MCP Server Coverage Tests", () => {
       
       // Test getClassDetails with existing and non-existent classes
       if (classes.length > 0) {
-        const classDetails = await crawler.getClassDetails(TEST_BASE_URL, classes[0].name);
+        const classDetails = await crawler.getClassDetails(TEST_BASE_URL, classes[0]?.name || "TestClass");
         // classDetails might be null for some classes, which is fine
       }
       
