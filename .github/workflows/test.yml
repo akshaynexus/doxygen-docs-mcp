@@ -43,7 +43,7 @@ jobs:
         file dist/enhanced-crawler.js
       
     - name: Run all tests with coverage
-      run: bun test --coverage
+      run: bun test --coverage --coverage-reporter=lcov
       timeout-minutes: 8
       
     - name: Upload coverage to Codecov

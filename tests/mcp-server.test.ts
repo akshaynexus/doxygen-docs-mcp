@@ -214,11 +214,11 @@ describe("MCP Server Integration Tests", () => {
 
     test("parameter validation simulation", async () => {
       // Test missing required parameters
-      await expect(
+      expect(
         crawler.searchDocs("", "query", 10)
       ).rejects.toThrow();
 
-      await expect(
+      expect(
         crawler.getPageContent("", "path")
       ).rejects.toThrow();
 
@@ -228,7 +228,7 @@ describe("MCP Server Integration Tests", () => {
       expect(emptyClassList).toHaveLength(0);
 
       // Test invalid parameters
-      await expect(
+      expect(
         crawler.searchDocs("invalid-url", "query", 10)
       ).rejects.toThrow();
     });
