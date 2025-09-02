@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "doxygen-docs": {
+      "command": "bun",
+      "args": ["run", "index.ts"],
+      "env": {}
+    }
+  }
+}
