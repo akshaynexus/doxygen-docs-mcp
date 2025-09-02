@@ -62,7 +62,7 @@ describe("Coverage Tests - Real Functionality", () => {
         expect(func).toHaveProperty("parameters");
         expect(func).toHaveProperty("returnType");
         
-        console.log(`Found function: ${func.name} - ${func.signature}`);
+        console.log(`Found function: ${func?.name} - ${func?.signature}`);
       }
     }, 15000);
 
