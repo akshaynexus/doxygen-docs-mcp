@@ -30,7 +30,7 @@ const GetClassDetailsSchema = z.object({
   className: z.string().describe("Name of the class to get details for"),
 });
 
-class DoxygenMCPServer {
+export class DoxygenMCPServer {
   private server: Server;
   private crawler: DoxygenCrawler;
 
@@ -51,7 +51,7 @@ class DoxygenMCPServer {
     this.setupHandlers();
   }
 
-  private setupHandlers() {
+  public setupHandlers() {
     this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
       tools: [
         {
@@ -210,6 +210,7 @@ class DoxygenMCPServer {
     console.error("Doxygen Docs MCP Server running on stdio");
   }
 }
+
 
 const server = new DoxygenMCPServer();
 server.run().catch(console.error);
