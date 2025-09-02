@@ -296,25 +296,29 @@ describe("EnhancedDoxygenCrawler Unit Tests", () => {
     test("should handle multiple simultaneous operations", async () => {
       const testUrl = "https://open.ys7.com/doc/en/pc/index.html";
       
-      // Clear cache first to ensure clean test
-      await crawler.close();
+      // Create fresh crawler for this test to ensure clean state
+      const testCrawler = new EnhancedDoxygenCrawler();
       
-      // First fetch to populate cache
-      const firstResult = await crawler.fetchPage(testUrl);
-      
-      // Now fetch multiple times simultaneously - should hit cache
-      const operations = [
-        crawler.fetchPage(testUrl),
-        crawler.fetchPage(testUrl),
-        crawler.fetchPage(testUrl)
-      ];
-      
-      const results = await Promise.all(operations);
-      
-      // All should return the same content from cache
-      expect(results[0]).toBe(firstResult);
-      expect(results[1]).toBe(firstResult);
-      expect(results[2]).toBe(firstResult);
-    }, 15000);
+      try {
+        // First fetch to populate cache
+        const firstResult = await testCrawler.fetchPage(testUrl);
+        
+        // Now fetch multiple times simultaneously - should hit cache
+        const operations = [
+          testCrawler.fetchPage(testUrl),
+          testCrawler.fetchPage(testUrl),
+          testCrawler.fetchPage(testUrl)
+        ];
+        
+        const results = await Promise.all(operations);
+        
+        // All should return the same content from cache
+        expect(results[0]).toBe(firstResult);
+        expect(results[1]).toBe(firstResult);
+        expect(results[2]).toBe(firstResult);
+      } finally {
+        await testCrawler.close();
+      }
+    }, 8000);
   });
 });

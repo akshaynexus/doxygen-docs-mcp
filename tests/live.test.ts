@@ -162,11 +162,13 @@ describe("Live Doxygen Site Integration Tests", () => {
     test("should extract content from class pages", async () => {
       const classes = await crawler.listClasses(TEST_BASE_URL);
       if (classes.length > 0) {
-        const classUrl = classes[0].url.replace(TEST_BASE_URL + "/", "");
-        const content = await crawler.getPageContent(TEST_BASE_URL, classUrl);
-        
-        expect(content.length).toBeGreaterThan(10);
-        expect(content).not.toMatch(/<[^>]+>/);
+        const classUrl = classes[0]?.url.replace(TEST_BASE_URL + "/", "") || "";
+        if (classUrl) {
+          const content = await crawler.getPageContent(TEST_BASE_URL, classUrl);
+          
+          expect(content.length).toBeGreaterThan(10);
+          expect(content).not.toMatch(/<[^>]+>/);
+        }
       }
     }, 15000);
   });
@@ -310,7 +312,7 @@ describe("Live Doxygen Site Integration Tests", () => {
       
       // Try to get details for a real class
       if (classes.length > 0) {
-        const classDetails = await crawler.getClassDetails(TEST_BASE_URL, classes[0].name);
+        const classDetails = await crawler.getClassDetails(TEST_BASE_URL, classes[0]?.name || "");
         expect(classDetails).toBeTruthy();
       }
     }, 30000);
@@ -352,9 +354,10 @@ describe("Live Doxygen Site Integration Tests", () => {
       // Validate object structures
       if (classes.length > 0) {
         const cls = classes[0];
-        expect(typeof cls.name).toBe("string");
-        expect(typeof cls.url).toBe("string");
-        expect(typeof cls.description).toBe("string");
+        expect(cls).toBeDefined();
+        expect(typeof cls?.name).toBe("string");
+        expect(typeof cls?.url).toBe("string");
+        expect(typeof cls?.description).toBe("string");
       }
     }, 20000);
   });

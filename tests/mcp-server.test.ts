@@ -1,4 +1,4 @@
-import { test, expect, describe, beforeAll, afterAll } from "bun:test";
+import { test, expect, describe, beforeAll, afterAll, beforeEach, afterEach } from "bun:test";
 import { EnhancedDoxygenCrawler } from "../src/enhanced-crawler";
 
 describe("MCP Server Integration Tests", () => {
@@ -7,27 +7,32 @@ describe("MCP Server Integration Tests", () => {
   describe("EnhancedDoxygenCrawler tests", () => {
     let crawler: EnhancedDoxygenCrawler;
 
-    beforeAll(() => {
+    beforeEach(() => {
       crawler = new EnhancedDoxygenCrawler();
     });
 
-    afterAll(async () => {
+    afterEach(async () => {
       await crawler.close();
     });
 
     test("should have all required API methods", async () => {
-      // Test that all methods exist and work - use cached data where possible
+      // Test methods sequentially to avoid overwhelming the server
       const content = await crawler.getPageContent(TEST_BASE_URL, "index.html");
       expect(content).toBeTruthy();
       expect(typeof content).toBe("string");
 
+      // Small delay to avoid rate limiting
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       const classes = await crawler.listClasses(TEST_BASE_URL);
       expect(classes).toBeInstanceOf(Array);
 
-      // Use smaller search to avoid timeout
+      // Use navigation structure cache for search to avoid rebuilding
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       const searchResults = await crawler.searchDocs(TEST_BASE_URL, "SDK", 3);
       expect(searchResults).toBeInstanceOf(Array);
-    }, 10000);
+    }, 8000);
 
     test("should return compatible data structures", async () => {
       const classes = await crawler.listClasses(TEST_BASE_URL);
@@ -38,7 +43,7 @@ describe("MCP Server Integration Tests", () => {
         expect(cls).toHaveProperty("url");
         expect(cls).toHaveProperty("description");
         
-        const details = await crawler.getClassDetails(TEST_BASE_URL, cls.name);
+        const details = await crawler.getClassDetails(TEST_BASE_URL, cls?.name || "");
         if (details) {
           expect(details).toHaveProperty("methods");
           expect(details).toHaveProperty("properties");
@@ -185,7 +190,7 @@ describe("MCP Server Integration Tests", () => {
 
       const args = {
         baseUrl: TEST_BASE_URL,
-        className: classes[0].name
+        className: classes[0]?.name || ""
       };
 
       const details = await crawler.getClassDetails(args.baseUrl, args.className);
@@ -198,10 +203,10 @@ describe("MCP Server Integration Tests", () => {
       expect(details).toHaveProperty("properties");
       expect(details).toHaveProperty("inheritance");
       
-      expect(details!.methods).toBeInstanceOf(Array);
-      expect(details!.properties).toBeInstanceOf(Array);
-      expect(details!.inheritance).toHaveProperty("baseClasses");
-      expect(details!.inheritance).toHaveProperty("derivedClasses");
+      expect(details?.methods).toBeInstanceOf(Array);
+      expect(details?.properties).toBeInstanceOf(Array);
+      expect(details?.inheritance).toHaveProperty("baseClasses");
+      expect(details?.inheritance).toHaveProperty("derivedClasses");
 
       // Should be JSON serializable
       expect(() => JSON.stringify(details)).not.toThrow();
@@ -248,7 +253,7 @@ describe("MCP Server Integration Tests", () => {
         expect(errorResponse).toHaveProperty("isError");
         expect(errorResponse.isError).toBe(true);
         expect(errorResponse.content).toHaveLength(1);
-        expect(errorResponse.content[0].type).toBe("text");
+        expect(errorResponse.content[0]?.type).toBe("text");
       }
     });
   });
@@ -286,8 +291,8 @@ describe("MCP Server Integration Tests", () => {
         expect(classDetails).not.toBeNull();
         
         // 4. Extract specific information
-        if (classDetails!.properties.length > 0) {
-          const properties = classDetails!.properties;
+        if (classDetails?.properties.length && classDetails.properties.length > 0) {
+          const properties = classDetails.properties;
           expect(properties.some(p => p.type.includes("int"))).toBe(true);
         }
       }

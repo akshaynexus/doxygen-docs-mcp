@@ -638,15 +638,17 @@ export class EnhancedDoxygenCrawler {
 
   private parseParameters(signature: string): ParameterInfo[] {
     const paramMatch = signature.match(/\((.*?)\)/);
-    if (!paramMatch || !paramMatch[1].trim()) return [];
+    if (!paramMatch || !paramMatch[1]?.trim()) return [];
     
     const paramString = paramMatch[1];
+    if (!paramString) return [];
+    
     const params = paramString.split(",").map(p => p.trim());
     
     return params.map(param => {
       const parts = param.trim().split(/\s+/);
-      const name = parts[parts.length - 1];
-      const type = parts.slice(0, -1).join(" ");
+      const name = parts[parts.length - 1] || "unknown";
+      const type = parts.slice(0, -1).join(" ") || "unknown";
       
       return {
         name,
@@ -681,7 +683,7 @@ export class EnhancedDoxygenCrawler {
 
   private extractMethodName(prototype: string): string {
     const match = prototype.match(/(\w+)\s*\(/);
-    return match ? match[1] : "unknown";
+    return match?.[1] || "unknown";
   }
 
   private extractPropertyName(prototype: string): string {
@@ -696,11 +698,12 @@ export class EnhancedDoxygenCrawler {
 
   private extractParameters(prototype: string): string {
     const match = prototype.match(/\((.*?)\)/);
-    return match ? match[1] : "";
+    return match?.[1] || "";
   }
 
   private extractReturnType(prototype: string): string {
     const beforeParen = prototype.split("(")[0];
+    if (!beforeParen) return "void";
     const parts = beforeParen.trim().split(/\s+/);
     return parts.slice(0, -1).join(" ") || "void";
   }
@@ -717,7 +720,7 @@ export class EnhancedDoxygenCrawler {
       const text = $(element).text();
       if (text.includes("Inherits")) {
         const match = text.match(/Inherits\s+(.+)/);
-        if (match) {
+        if (match?.[1]) {
           bases.push(...match[1].split(",").map(s => s.trim()));
         }
       }
@@ -731,7 +734,7 @@ export class EnhancedDoxygenCrawler {
       const text = $(element).text();
       if (text.includes("Inherited by")) {
         const match = text.match(/Inherited by\s+(.+)/);
-        if (match) {
+        if (match?.[1]) {
           derived.push(...match[1].split(",").map(s => s.trim()));
         }
       }
