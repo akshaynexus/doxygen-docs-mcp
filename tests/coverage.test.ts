@@ -1,87 +1,159 @@
-import { test, expect, describe } from "bun:test";
+import { test, expect, describe, beforeEach, afterEach } from "bun:test";
+import { EnhancedDoxygenCrawler } from "../src/enhanced-crawler";
 
-// This test file verifies that all code paths are covered by the existing tests
+describe("Coverage Tests - Real Functionality", () => {
+  let crawler: EnhancedDoxygenCrawler;
 
-describe("Test Coverage Verification", () => {
-  test("Live tests cover all major functionality", () => {
-    // The live.test.ts file covers:
-    const coverageAreas = [
-      "fetchPage - HTTP requests with caching",
-      "getNavigationStructure - Complete site analysis",
-      "listClasses - Class extraction from multiple pages",
-      "getClassDetails - Detailed class parsing with methods and properties",
-      "getPageContent - Clean content extraction",
-      "searchDocs - Full-text search across all page types",
-      "getModules - Module extraction",
-      "getFiles - File listing extraction",
-      "getFunctions - Function extraction from files",
-      "Error handling - Network errors, invalid URLs",
-      "Performance - Caching and concurrent operations",
-      "Data validation - Type checking and structure validation"
-    ];
-    
-    expect(coverageAreas.length).toBe(12);
-    
-    // All major methods are tested
-    const testedMethods = [
-      "fetchPage",
-      "getNavigationStructure",
-      "listClasses",
-      "getClassDetails",
-      "getPageContent",
-      "searchDocs",
-      "getModules",
-      "getFiles",
-      "getFunctions",
-      "close"
-    ];
-    
-    expect(testedMethods.length).toBe(10);
-    
-    // Private methods tested indirectly through public API
-    const privateMethodsCovered = [
-      "getCacheKey",
-      "isValidCache",
-      "determinePageType",
-      "extractContentSnippet",
-      "extractMethodName",
-      "extractPropertyName", 
-      "extractPropertyType",
-      "extractParameters",
-      "extractReturnType",
-      "extractVisibility",
-      "parseParameters",
-      "extractBaseClasses",
-      "extractDerivedClasses"
-    ];
-    
-    expect(privateMethodsCovered.length).toBe(13);
+  beforeEach(() => {
+    crawler = new EnhancedDoxygenCrawler();
   });
 
-  test("MCP server tests cover all tools", () => {
-    const toolsCovered = [
-      "search_docs",
-      "get_page_content", 
-      "list_classes",
-      "get_class_details"
-    ];
-    
-    expect(toolsCovered.length).toBe(4);
+  afterEach(async () => {
+    await crawler.close();
   });
 
-  test("Unit tests cover edge cases", () => {
-    const edgeCasesCovered = [
-      "Empty inputs",
-      "Invalid URLs",
-      "Network errors",
-      "Malformed HTML",
-      "Cache expiration",
-      "Concurrent requests",
-      "Large result sets",
-      "Non-existent classes",
-      "Partial name matching"
-    ];
-    
-    expect(edgeCasesCovered.length).toBe(9);
+  describe("Real Doxygen site parsing", () => {
+    test("should extract inheritance information from actual site", async () => {
+      const TEST_BASE_URL = "https://open.ys7.com/doc/en/pc";
+      
+      // Get real class details to test inheritance paths
+      const classes = await crawler.listClasses(TEST_BASE_URL);
+      
+      if (classes.length > 0) {
+        // Try to find a class that might have inheritance info
+        for (const cls of classes.slice(0, 5)) {
+          const details = await crawler.getClassDetails(TEST_BASE_URL, cls.name);
+          
+          if (details) {
+            // Test inheritance extraction (lines 719-725, 733-739)
+            expect(details.inheritance).toHaveProperty("baseClasses");
+            expect(details.inheritance).toHaveProperty("derivedClasses");
+            expect(details.inheritance.baseClasses).toBeInstanceOf(Array);
+            expect(details.inheritance.derivedClasses).toBeInstanceOf(Array);
+            
+            // If we find actual inheritance, test it
+            if (details.inheritance.baseClasses.length > 0 || details.inheritance.derivedClasses.length > 0) {
+              console.log(`Found inheritance in ${cls.name}:`, {
+                base: details.inheritance.baseClasses,
+                derived: details.inheritance.derivedClasses
+              });
+              break;
+            }
+          }
+        }
+      }
+    }, 30000);
+
+    test("should test function extraction from real site", async () => {
+      const TEST_BASE_URL = "https://open.ys7.com/doc/en/pc";
+      
+      // Test real function extraction
+      const functions = await crawler.getFunctions(TEST_BASE_URL);
+      
+      // Functions should be extracted properly (lines 588-608)
+      expect(functions).toBeInstanceOf(Array);
+      
+      if (functions.length > 0) {
+        const func = functions[0];
+        expect(func).toHaveProperty("name");
+        expect(func).toHaveProperty("url");
+        expect(func).toHaveProperty("description");
+        expect(func).toHaveProperty("signature");
+        expect(func).toHaveProperty("parameters");
+        expect(func).toHaveProperty("returnType");
+        
+        console.log(`Found function: ${func.name} - ${func.signature}`);
+      }
+    }, 15000);
+
+    test("should test class extraction path with dt/dd elements", async () => {
+      const TEST_BASE_URL = "https://open.ys7.com/doc/en/pc";
+      
+      // Get navigation structure to test dt/dd parsing paths (lines 420-440)
+      const structure = await crawler.getNavigationStructure(TEST_BASE_URL);
+      
+      expect(structure).toHaveProperty("classes");
+      expect(structure.classes).toBeInstanceOf(Array);
+      
+      // Test that classes were found through various parsing methods
+      if (structure.classes.length > 0) {
+        console.log(`Found ${structure.classes.length} classes through navigation structure`);
+        
+        // Test class structure 
+        const cls = structure.classes[0];
+        expect(cls).toHaveProperty("name");
+        expect(cls).toHaveProperty("url");
+        expect(cls).toHaveProperty("description");
+        expect(cls).toHaveProperty("section");
+      }
+    }, 20000);
+
+    test("should test various parsing methods and private functions", async () => {
+      const TEST_BASE_URL = "https://open.ys7.com/doc/en/pc";
+      
+      // Test modules extraction
+      const modules = await crawler.getModules(TEST_BASE_URL);
+      expect(modules).toBeInstanceOf(Array);
+      
+      // Test files extraction  
+      const files = await crawler.getFiles(TEST_BASE_URL);
+      expect(files).toBeInstanceOf(Array);
+      
+      console.log(`Found ${modules.length} modules and ${files.length} files`);
+    }, 20000);
+
+    test("should test edge cases and error handling", async () => {
+      // Test with malformed URL
+      const emptyClasses = await crawler.listClasses("");
+      expect(emptyClasses).toBeInstanceOf(Array);
+      expect(emptyClasses).toHaveLength(0);
+      
+      // Test with non-existent class
+      const noClass = await crawler.getClassDetails("https://open.ys7.com/doc/en/pc", "NonExistentClass123456789");
+      expect(noClass).toBeNull();
+      
+      // Test search with empty query
+      const emptySearch = await crawler.searchDocs("https://open.ys7.com/doc/en/pc", "", 10);
+      expect(emptySearch).toBeInstanceOf(Array);
+      expect(emptySearch).toHaveLength(0);
+    }, 15000);
+
+    test("should test private methods via reflection for complete coverage", () => {
+      // Test private methods directly to hit uncovered lines
+      const testCrawler = crawler as any;
+      
+      // Test parseParameters with complex signatures
+      const complexParams = testCrawler.parseParameters("func(const std::vector<int>& data, bool flag)");
+      expect(complexParams).toBeInstanceOf(Array);
+      expect(complexParams.length).toBe(2);
+      
+      // Test extractBaseClasses with mock cheerio
+      const mockCheerio = (selector: string) => ({
+        each: (callback: any) => {
+          if (selector === ".inherit") {
+            // Simulate inheritance elements
+            callback(0, { textContent: "Inherits BaseClass1, BaseClass2" });
+            callback(1, { textContent: "Some other text" }); // No match
+          }
+        },
+        text: () => "Inherits BaseClass1, BaseClass2"
+      });
+      
+      const baseClasses = testCrawler.extractBaseClasses(mockCheerio);
+      expect(baseClasses).toBeInstanceOf(Array);
+      
+      // Test extractDerivedClasses 
+      const mockCheerioDerive = (selector: string) => ({
+        each: (callback: any) => {
+          if (selector === ".inherit") {
+            callback(0, { textContent: "Inherited by DerivedClass1, DerivedClass2" });
+          }
+        },
+        text: () => "Inherited by DerivedClass1, DerivedClass2"
+      });
+      
+      const derivedClasses = testCrawler.extractDerivedClasses(mockCheerioDerive);
+      expect(derivedClasses).toBeInstanceOf(Array);
+    });
   });
 });
