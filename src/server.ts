@@ -212,5 +212,8 @@ export class DoxygenMCPServer {
 }
 
 
-const server = new DoxygenMCPServer();
-server.run().catch(console.error);
+// Only start the server when this file is executed directly, not when imported for tests
+if (import.meta.main) {
+  const server = new DoxygenMCPServer();
+  server.run().catch(console.error);
+}
