@@ -1,7 +1,7 @@
 # Doxygen Documentation MCP Server
 
-[![CI](https://github.com/akshaycm/doxygen-docs-mcp/actions/workflows/test.yml/badge.svg)](https://github.com/akshaycm/doxygen-docs-mcp/actions/workflows/test.yml)
-[![codecov](https://codecov.io/gh/akshaycm/doxygen-docs-mcp/branch/main/graph/badge.svg)](https://codecov.io/gh/akshaycm/doxygen-docs-mcp)
+[![CI](https://github.com/akshaynexus/doxygen-docs-mcp/actions/workflows/test.yml/badge.svg)](https://github.com/akshaynexus/doxygen-docs-mcp/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/akshaynexus/doxygen-docs-mcp/branch/main/graph/badge.svg)](https://codecov.io/gh/akshaynexus/doxygen-docs-mcp)
 [![TypeScript](https://img.shields.io/badge/TypeScript-4.9+-blue.svg)](#)
 [![Bun](https://img.shields.io/badge/Bun-1.2+-orange.svg)](#)
 
@@ -23,7 +23,7 @@ A Model Context Protocol (MCP) server that enables AI agents to crawl and parse 
 
 ```bash
 # Clone the repository
-git clone https://github.com/akshaycm/doxygen-docs-mcp.git
+git clone https://github.com/akshaynexus/doxygen-docs-mcp.git
 cd doxygen-docs-mcp
 
 # Install dependencies
