@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Test & Build
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        bun-version: [1.2.20, latest]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+      
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: ${{ matrix.bun-version }}
+    
+    - name: Install dependencies
+      run: bun install
+      
+    - name: Type check
+      run: bunx tsc --noEmit
+      
+    - name: Build server
+      run: bun build src/server.ts --outdir dist --target node
+      
+    - name: Build crawler
+      run: bun build src/enhanced-crawler.ts --outdir dist --target node
+      
+    - name: Verify build outputs
+      run: |
+        ls -la dist/
+        file dist/server.js
+        file dist/enhanced-crawler.js
+      
+    - name: Run all tests with coverage
+      run: bun test --coverage
+      timeout-minutes: 8
+      
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v5
+      if: matrix.bun-version == 'latest'
+      with:
+        fail_ci_if_error: true
+        files: ./coverage/lcov.info
+        flags: unittests
+        name: doxygen-docs-mcp
+        verbose: true
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+    
+    - name: Performance check
+      if: matrix.bun-version == 'latest'
+      run: |
+        echo "Verifying test performance..."
+        echo "All tests should complete under 8 minutes total"

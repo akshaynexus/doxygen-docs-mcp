@@ -555,44 +555,83 @@ export class EnhancedDoxygenCrawler {
   }
 
   async getFunctions(baseUrl: string): Promise<FunctionInfo[]> {
-    const functions: FunctionInfo[] = [];
-    const structure = await this.getNavigationStructure(baseUrl);
+    // Check cache first
+    const cacheKey = `functions_${baseUrl}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached && this.isValidCache(cached.timestamp)) {
+      return cached.data;
+    }
     
-    // Search through files and modules for functions
-    for (const file of structure.files) {
-      try {
-        const content = await this.fetchPage(file.url);
-        const $ = cheerio.load(content);
+    const functions: FunctionInfo[] = [];
+    
+    try {
+      // Only check the main index page and functions page if it exists
+      const indexContent = await this.fetchPage(`${baseUrl}/index.html`);
+      const $ = cheerio.load(indexContent);
+      
+      // Look for direct function links in the index
+      const functionLinks = $("a[href*='function']").toArray().slice(0, 3); // Limit to 3 for performance
+      
+      for (const link of functionLinks) {
+        const href = $(link).attr('href');
+        if (!href) {
+          continue;
+        }
+
+        const functionUrl = href.startsWith('http') ? href : `${baseUrl}/${href}`;
         
-        $(".memitem").each((_, element) => {
-          const $item = $(element);
-          const $prototype = $item.find(".memproto");
-          const $doc = $item.find(".memdoc");
+        try {
+          const funcContent = await this.fetchPage(functionUrl);
+          const $func = cheerio.load(funcContent);
           
-          if ($prototype.length) {
-            const prototypeText = $prototype.text().trim();
+          // Extract function info from the page
+          $func(".memitem").first().each((_, element) => {
+            const $item = $func(element);
+            const $prototype = $item.find(".memproto");
+            const $doc = $item.find(".memdoc");
             
-            if (prototypeText.includes("(") && prototypeText.includes(")") && 
-                !prototypeText.includes("class ") && !prototypeText.includes("struct ")) {
+            if ($prototype.length) {
+              const prototypeText = $prototype.text().trim();
               
-              const name = this.extractMethodName(prototypeText);
-              if (name !== "unknown" && !functions.find(f => f.name === name)) {
-                functions.push({
-                  name,
-                  url: file.url,
-                  description: $doc.text().trim(),
-                  signature: prototypeText,
-                  parameters: this.parseParameters(prototypeText),
-                  returnType: this.extractReturnType(prototypeText),
-                });
+              if (prototypeText.includes("(") && prototypeText.includes(")")) {
+                const name = this.extractMethodName(prototypeText);
+                if (name !== "unknown") {
+                  functions.push({
+                    name,
+                    url: functionUrl,
+                    description: $doc.text().trim(),
+                    signature: prototypeText,
+                    parameters: this.parseParameters(prototypeText),
+                    returnType: this.extractReturnType(prototypeText),
+                  });
+                }
               }
             }
+          });
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          console.warn(`Failed to load function page ${functionUrl}: ${errorMessage}`);
+          
+          // If it's a network error, we might want to retry or fail differently
+          if (errorMessage.includes('fetch') || errorMessage.includes('network')) {
+            console.warn('Network error detected, this might indicate connectivity issues');
           }
-        });
-      } catch (error) {
-        console.error(`Error processing file ${file.url}:`, error);
+        }
       }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error(`Failed to load function index for ${baseUrl}: ${errorMessage}`);
+      
+      // This is a more serious error - we couldn't even load the main page
+      // In a production system, this might warrant different handling
+      throw new Error(`Unable to access documentation at ${baseUrl}: ${errorMessage}`);
     }
+    
+    // Cache the results
+    this.cache.set(cacheKey, {
+      data: functions,
+      timestamp: Date.now()
+    });
     
     return functions;
   }

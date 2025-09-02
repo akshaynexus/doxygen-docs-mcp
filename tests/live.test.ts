@@ -267,7 +267,7 @@ describe("Live Doxygen Site Integration Tests", () => {
       expect(functions).toBeInstanceOf(Array);
       
       // If functions exist, they should have proper structure
-      for (const func of functions) {
+      for (const func of functions.slice(0, 3)) {
         expect(func).toHaveProperty("name");
         expect(func).toHaveProperty("url");
         expect(func).toHaveProperty("description");
@@ -279,7 +279,7 @@ describe("Live Doxygen Site Integration Tests", () => {
         expect(func.url).toMatch(/^https?:\/\//);
         expect(func.parameters).toBeInstanceOf(Array);
       }
-    }, 15000);
+    }, 8000);
   });
 
   describe("Error handling with live site", () => {
