@@ -77,12 +77,18 @@ export class DoxygenMCPServer {
     // Support flags: --baseUrl <url>, --base-url <url>, --baseUrl=<url>, --base-url=<url>
     const args = argv.slice(2);
     for (let i = 0; i < args.length; i++) {
-      const a = args[i];
-      if (a === "--baseUrl" || a === "--base-url") {
-        return args[i + 1];
+      const token = args[i];
+      if (token === "--baseUrl" || token === "--base-url") {
+        const next = args[i + 1];
+        if (typeof next === "string" && next && !next.startsWith("--")) {
+          return next;
+        }
+        continue;
       }
-      const match = a.match(/^--base[-]?url=(.*)$/i);
-      if (match && match[1]) return match[1];
+      if (typeof token === "string") {
+        const match = token.match(/^--base[-]?url=(.+)$/i);
+        if (match && match[1]) return match[1];
+      }
     }
     return undefined;
   }

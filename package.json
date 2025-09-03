@@ -10,6 +10,10 @@
     "build": "bun build index.ts --outdir dist --target node",
     "start": "bun run index.ts",
     "dev": "bun --hot run index.ts",
+    "typecheck": "bunx tsc --noEmit",
+    "check": "bunx tsc --noEmit && bun test",
+    "setup:hooks": "git config core.hooksPath githooks",
+    "lint": "bunx tsc --noEmit",
     "test": "bun test",
     "test:coverage": "c8 --reporter=text --reporter=html bun test",
     "test:live": "bun test tests/live.test.ts"

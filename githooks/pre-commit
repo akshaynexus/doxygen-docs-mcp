@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "Running TypeScript type-check (no emit)..."
+
+# Use bunx to run the local TypeScript compiler without emitting files
+bunx --bun tsc --noEmit
+
+echo "Type-check passed."
+

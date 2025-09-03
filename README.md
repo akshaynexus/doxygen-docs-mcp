@@ -146,6 +146,10 @@ Get detailed information about a specific class.
 # Install dependencies
 bun install
 
+# One-off: Configure repo hooks (pre-commit runs TypeScript typecheck)
+bun run setup:hooks
+chmod +x githooks/pre-commit
+
 # Run tests in watch mode
 bun test --watch
 
