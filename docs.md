@@ -310,14 +310,14 @@ export DOXYGEN_DEBUG=true
 
 ### MCP Server Configuration
 
-When using with Claude Desktop or other MCP clients, add to your configuration:
+When using with Claude Desktop or other MCP clients, add to your configuration. You can pass the base URL once via args so tools don't need it each call:
 
 ```json
 {
   "mcpServers": {
     "doxygen-docs": {
       "command": "bun",
-      "args": ["run", "src/server.ts"],
+      "args": ["run", "src/server.ts", "--baseUrl", "https://open.ys7.com/doc/en/pc"],
       "cwd": "/path/to/doxygen-docs-mcp"
     }
   }
@@ -358,7 +358,7 @@ When running as an MCP server, the following tools are exposed:
         "maximum": 50
       }
     },
-    "required": ["baseUrl", "query"]
+    "required": ["query"]
   }
 }
 ```
@@ -384,7 +384,7 @@ When running as an MCP server, the following tools are exposed:
         "description": "Relative path to the page (e.g., 'index.html', 'class_example.html')"
       }
     },
-    "required": ["baseUrl", "path"]
+    "required": ["path"]
   }
 }
 ```
@@ -406,7 +406,7 @@ When running as an MCP server, the following tools are exposed:
         "description": "Base URL of the Doxygen documentation site"
       }
     },
-    "required": ["baseUrl"]
+    "required": []
   }
 }
 ```
@@ -432,7 +432,7 @@ When running as an MCP server, the following tools are exposed:
         "description": "Name of the class to get details for"
       }
     },
-    "required": ["baseUrl", "className"]
+    "required": ["className"]
   }
 }
 ```

@@ -154,11 +154,11 @@ describe("MCP Server Direct Handler Tests for 100% Coverage", () => {
               inputSchema: {
                 type: "object",
                 properties: {
-                  baseUrl: { type: "string", description: "Base URL of the Doxygen documentation site" },
+                  baseUrl: { type: "string", description: "Base URL of the Doxygen documentation site (optional if provided at server start)" },
                   query: { type: "string", description: "Search query to find in documentation" },
                   maxResults: { type: "number", description: "Maximum number of results to return", default: 10 }
                 },
-                required: ["baseUrl", "query"]
+                required: ["query"]
               }
             },
             {
@@ -167,10 +167,10 @@ describe("MCP Server Direct Handler Tests for 100% Coverage", () => {
               inputSchema: {
                 type: "object",
                 properties: {
-                  baseUrl: { type: "string", description: "Base URL of the Doxygen documentation site" },
+                  baseUrl: { type: "string", description: "Base URL of the Doxygen documentation site (optional if provided at server start)" },
                   path: { type: "string", description: "Path to specific documentation page" }
                 },
-                required: ["baseUrl", "path"]
+                required: ["path"]
               }
             },
             {
@@ -179,9 +179,9 @@ describe("MCP Server Direct Handler Tests for 100% Coverage", () => {
               inputSchema: {
                 type: "object",
                 properties: {
-                  baseUrl: { type: "string", description: "Base URL of the Doxygen documentation site" }
+                  baseUrl: { type: "string", description: "Base URL of the Doxygen documentation site (optional if provided at server start)" }
                 },
-                required: ["baseUrl"]
+                required: []
               }
             },
             {
@@ -190,10 +190,10 @@ describe("MCP Server Direct Handler Tests for 100% Coverage", () => {
               inputSchema: {
                 type: "object",
                 properties: {
-                  baseUrl: { type: "string", description: "Base URL of the Doxygen documentation site" },
+                  baseUrl: { type: "string", description: "Base URL of the Doxygen documentation site (optional if provided at server start)" },
                   className: { type: "string", description: "Name of the class to get details for" }
                 },
-                required: ["baseUrl", "className"]
+                required: ["className"]
               }
             }
           ];

@@ -35,8 +35,8 @@ bun install
 #### As an MCP Server
 
 ```bash
-# Start the MCP server
-bun run src/server.ts
+# Start the MCP server (set base URL once)
+bun run src/server.ts --baseUrl https://open.ys7.com/doc/en/pc
 ```
 
 #### Programmatic Usage
@@ -103,7 +103,7 @@ When running as an MCP server, the following tools are available:
 Search through Doxygen documentation for specific content.
 
 **Parameters:**
-- `baseUrl` (string, required): Base URL of the Doxygen site
+- `baseUrl` (string, optional): Base URL of the Doxygen site. If omitted, the server uses the value passed at startup via `--baseUrl`.
 - `query` (string, required): Search term
 - `maxResults` (number, optional): Maximum results to return (default: 10)
 
@@ -111,20 +111,20 @@ Search through Doxygen documentation for specific content.
 Extract clean text content from a specific documentation page.
 
 **Parameters:**
-- `baseUrl` (string, required): Base URL of the Doxygen site  
+- `baseUrl` (string, optional): Base URL of the Doxygen site. If omitted, the server uses the value passed at startup via `--baseUrl`.
 - `path` (string, required): Relative path to the page
 
 ### `list_classes`
 List all classes found in the documentation.
 
 **Parameters:**
-- `baseUrl` (string, required): Base URL of the Doxygen site
+- `baseUrl` (string, optional): Base URL of the Doxygen site. If omitted, the server uses the value passed at startup via `--baseUrl`.
 
 ### `get_class_details`
 Get detailed information about a specific class.
 
 **Parameters:**
-- `baseUrl` (string, required): Base URL of the Doxygen site
+- `baseUrl` (string, optional): Base URL of the Doxygen site. If omitted, the server uses the value passed at startup via `--baseUrl`.
 - `className` (string, required): Name of the class
 
 ## Performance Features
